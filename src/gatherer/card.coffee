@@ -9,9 +9,13 @@ module.exports = (details, callback) ->
     callback new Error 'invalid which property (valid values are "a" and "b")'
 
   url = gatherer.card.url 'Details.aspx', details
-  request {url, followRedirect: no}, (err, res, body) ->
-    err ?= new Error 'unexpected status code' unless res.statusCode is 200
-    if err then callback err else callback null, extract body, details
+  request {url}, (err, res, body) ->
+    if err
+      callback err
+    else if res.request.uri.pathname isnt '/Pages/Card/Details.aspx'
+      callback new Error 'card not found'
+    else
+      callback null, extract body, details
   return
 
 extract = (html, details) ->
